@@ -1,0 +1,74 @@
+services:
+  mongo1_7:
+    container_name: mongo1_7
+    image: mongo:latest
+    command: ["--replSet", "rs0", "--bind_ip_all", "--port", "27021", "--keyFile", "/etc/mongodb/pki/keyfile"]
+    restart: always
+    ports:
+      - 27021:27017
+    networks:
+      - mongo-cluster
+    volumes:
+      - /home/bdata/mongo-replica-7/rs_keyfile:/etc/mongodb/pki/keyfile
+      - "/home/bdata/bigdata-file/mongodb7/mongo1_data:/data/db"
+      - "/home/bdata/bigdata-file/mongodb7/mongo1_config:/data/configdb"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: Bigdata2024
+
+
+  mongo2_7:
+    image: mongo:latest
+    container_name: mongo2_7
+    command: ["--replSet", "rs0" ,"--bind_ip_all", "--port", "27022","--keyFile", "/etc/mongodb/pki/keyfile"]
+    restart: always
+    ports:
+      - 27022:27017
+    networks:
+      - mongo-cluster
+    volumes:
+      - /home/bdata/mongo-replica-7/rs_keyfile:/etc/mongodb/pki/keyfile
+      - "/home/bdata/bigdata-file/mongodb7/mongo2_data:/data/db"
+      - "/home/bdata/bigdata-file/mongodb7/mongo2_config:/data/configdb"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: Bigdata2024
+
+
+  mongo3_7:
+    image: mongo:latest
+    container_name: mongo3_7
+    command: ["--replSet", "rs0" ,"--bind_ip_all", "--port", "27023","--keyFile", "/etc/mongodb/pki/keyfile"]
+    restart: always
+    ports:
+      - 27023:27017
+    networks:
+      - mongo-cluster
+    volumes:
+      - /home/bdata/mongo-replica-7/rs_keyfile:/etc/mongodb/pki/keyfile
+      - "/home/bdata/bigdata-file/mongodb7/mongo3_data:/data/db"
+      - "/home/bdata/bigdata-file/mongodb7/mongo3_config:/data/configdb"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: Bigdata2024
+
+  haproxy7:
+    image: haproxy:latest
+    container_name: haproxy7
+    restart: always
+    ports:
+      - "27026:27026"  # Write frontend
+      - "27027:27027"  # Read frontend
+      - "8405:8405"
+    networks:
+      - mongo-cluster
+    volumes:
+      - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg
+    depends_on:
+      - mongo1_7
+      - mongo2_7
+      - mongo3_7
+
+networks:
+  mongo-cluster:
+    driver: bridge
